@@ -15,7 +15,7 @@ fn copy(into: &mut [u8], from: &[u8], pos: &mut usize) -> usize {
         *slot = *val;
     }
     *pos += min;
-    return min;
+    min
 }
 fn corrupt() -> io::Error {
     io::Error::new(
@@ -101,11 +101,11 @@ fn read_gz_header<R: Read>(r: &mut R) -> io::Result<GzHeader> {
     }
 
     Ok(GzHeader {
-        extra: extra,
-        filename: filename,
-        comment: comment,
+        extra,
+        filename,
+        comment,
         operating_system: os,
-        mtime: mtime,
+        mtime,
     })
 }
 
@@ -151,7 +151,7 @@ pub fn gz_encoder<R: BufRead>(header: Vec<u8>, r: R, lvl: Compression) -> GzEnco
     let crc = CrcReader::new(r);
     GzEncoder {
         inner: deflate::bufread::DeflateEncoder::new(crc, lvl),
-        header: header,
+        header,
         pos: 0,
         eof: false,
     }
@@ -174,7 +174,7 @@ impl<R: BufRead> GzEncoder<R> {
             return Ok(0);
         }
         let crc = self.inner.get_ref().crc();
-        let ref arr = [
+        let arr = &[
             (crc.sum() >> 0) as u8,
             (crc.sum() >> 8) as u8,
             (crc.sum() >> 16) as u8,
@@ -291,7 +291,7 @@ impl<R: BufRead> GzDecoder<R> {
         let flate = deflate::bufread::DeflateDecoder::new(r);
         GzDecoder {
             inner: CrcReader::new(flate),
-            header: header,
+            header,
             finished: false,
         }
     }
@@ -300,7 +300,7 @@ impl<R: BufRead> GzDecoder<R> {
         if self.finished {
             return Ok(());
         }
-        let ref mut buf = [0u8; 8];
+        let buf = &mut [0u8; 8];
         {
             let mut len = 0;
 
@@ -447,7 +447,7 @@ impl<R: BufRead> MultiGzDecoder<R> {
         if self.finished {
             return Ok(0);
         }
-        let ref mut buf = [0u8; 8];
+        let buf = &mut [0u8; 8];
         {
             let mut len = 0;
 

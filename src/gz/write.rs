@@ -45,7 +45,7 @@ pub fn gz_encoder<W: Write>(header: Vec<u8>, w: W, lvl: Compression) -> GzEncode
     GzEncoder {
         inner: zio::Writer::new(w, Compress::new(lvl, false)),
         crc: Crc::new(),
-        header: header,
+        header,
         crc_bytes_written: 0,
     }
 }
@@ -132,7 +132,7 @@ impl<W: Write> GzEncoder<W> {
     }
 
     fn write_header(&mut self) -> io::Result<()> {
-        while self.header.len() > 0 {
+        while !self.header.is_empty() {
             let n = self.inner.get_mut().write(&self.header)?;
             self.header.drain(..n);
         }

@@ -347,7 +347,7 @@ impl Compress {
                 self.compress(input, out, flush)
             };
             output.set_len((self.total_out() - before) as usize + len);
-            return ret;
+            ret
         }
     }
 }
@@ -476,7 +476,7 @@ impl Decompress {
                 self.decompress(input, out, flush)
             };
             output.set_len((self.total_out() - before) as usize + len);
-            return ret;
+            ret
         }
     }
 
